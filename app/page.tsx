@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { Camera, Leaf, MessageCircle, CloudRain, Mic, Send, Upload, Thermometer, Droplets, MapPin, Navigation } from "lucide-react"
+import { Camera, Leaf, MessageCircle, CloudRain, Mic, MicOff, Send, Upload, Thermometer, Droplets, MapPin, Navigation } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,6 +29,15 @@ export default function FarmSagePage() {
   ])
   const [inputMessage, setInputMessage] = useState("")
   const [isRecording, setIsRecording] = useState(false)
+  const [speechSupported, setSpeechSupported] = useState(false)
+  const recognitionRef = useRef<SpeechRecognition | null>(null)
+
+  useEffect(() => {
+    const SpeechRecognitionAPI =
+      (window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ||
+      (window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition
+    setSpeechSupported(!!SpeechRecognitionAPI)
+  }, [])
   const [isChatLoading, setIsChatLoading] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState("English")
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -151,8 +160,39 @@ export default function FarmSagePage() {
   }, [messages, isChatLoading])
 
   const handleVoiceInput = () => {
-    setIsRecording(!isRecording)
-    // Voice recording logic would go here
+    const SpeechRecognitionAPI =
+      (window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition ||
+      (window as Window & { SpeechRecognition?: typeof SpeechRecognition; webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition
+    if (!SpeechRecognitionAPI) return
+
+    if (isRecording) {
+      recognitionRef.current?.stop()
+      return
+    }
+
+    const recognition = new SpeechRecognitionAPI()
+    recognitionRef.current = recognition
+    recognition.lang = selectedLanguage === "Hindi" ? "hi-IN"
+      : selectedLanguage === "Telugu" ? "te-IN"
+      : selectedLanguage === "Tamil" ? "ta-IN"
+      : selectedLanguage === "Marathi" ? "mr-IN"
+      : "en-US"
+    recognition.interimResults = true
+    recognition.continuous = false
+
+    recognition.onstart = () => setIsRecording(true)
+    recognition.onend = () => setIsRecording(false)
+    recognition.onerror = () => setIsRecording(false)
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = Array.from(event.results)
+        .map((r) => r[0].transcript)
+        .join("")
+      setInputMessage(transcript)
+      if (event.results[event.results.length - 1].isFinal) {
+        recognition.stop()
+      }
+    }
+    recognition.start()
   }
 
   return (
@@ -394,17 +434,19 @@ export default function FarmSagePage() {
               <Button
                 variant="outline"
                 size="icon"
-                className={`shrink-0 ${isRecording ? "bg-destructive text-destructive-foreground" : ""}`}
+                title={!speechSupported ? "Voice input not supported in this browser" : isRecording ? "Stop recording" : "Start voice input"}
+                disabled={!speechSupported || isChatLoading}
+                className={`shrink-0 transition-colors ${isRecording ? "bg-destructive text-destructive-foreground border-destructive animate-pulse" : ""}`}
                 onClick={handleVoiceInput}
               >
-                <Mic className="h-4 w-4" />
+                {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </Button>
               <Input
-                placeholder="Type your question..."
+                placeholder={isRecording ? "Listening..." : "Type your question..."}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                className="flex-1"
+                className={`flex-1 ${isRecording ? "border-destructive" : ""}`}
                 disabled={isChatLoading}
               />
               <Button
