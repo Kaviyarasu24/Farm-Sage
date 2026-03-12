@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import ReactMarkdown from "react-markdown"
 
 interface WeatherData {
   temperature: number | null
@@ -366,7 +367,13 @@ export default function FarmSagePage() {
                       message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
                     }`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    {message.role === "assistant" ? (
+                      <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-strong:font-semibold prose-headings:font-semibold">
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed">{message.content}</p>
+                    )}
                   </div>
                 </div>
               ))}
