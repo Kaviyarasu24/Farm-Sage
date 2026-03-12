@@ -32,6 +32,8 @@ export default function FarmSagePage() {
   const [isChatLoading, setIsChatLoading] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState("English")
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
 
   const fetchWeatherAndPlace = async (latitude: number, longitude: number) => {
     setWeatherLoading(true)
@@ -307,41 +309,37 @@ export default function FarmSagePage() {
                   <p className="text-sm text-muted-foreground text-center">Upload or capture a leaf image</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <label htmlFor="camera-input">
-                    <Button
-                      variant="default"
-                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                      asChild
-                    >
-                      <span>
-                        <Camera className="mr-2 h-4 w-4" />
-                        Camera
-                      </span>
-                    </Button>
-                    <input
-                      id="camera-input"
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-                  <label htmlFor="upload-input">
-                    <Button variant="outline" className="w-full bg-transparent" asChild>
-                      <span>
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload
-                      </span>
-                    </Button>
-                    <input
-                      id="upload-input"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
+                  <Button
+                    variant="default"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    Camera
+                  </Button>
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full bg-transparent"
+                    onClick={() => uploadInputRef.current?.click()}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload
+                  </Button>
+                  <input
+                    ref={uploadInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
                 </div>
               </div>
             )}
