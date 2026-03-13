@@ -8,7 +8,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy": "opennextjs-cloudflare build --config wrangler.jsonc --openNextConfigPath open-next.config.ts && opennextjs-cloudflare deploy --config wrangler.jsonc",
     "lint": "eslint .",
     "start": "next start"
   },
