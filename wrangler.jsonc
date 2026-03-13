@@ -1,13 +1,13 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "farm-fage",
+  "name": "farm-sage",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-09-27",
   "compatibility_flags": ["nodejs_compat"],
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "farm-fage"
+      "service": "farm-sage"
     }
   ]
 }
